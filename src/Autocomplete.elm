@@ -1,4 +1,33 @@
-module Autocomplete exposing (Autocomplete, Config, Msg, init, input, setSuggestions, toView, update)
+module Autocomplete exposing
+    ( Config
+    , Autocomplete, Msg, init, input, setSuggestions, toView, update
+    )
+
+{-| An opinionated autocomplete component that fits our needs. It's broken into its own package because we need to use it in both the webshop and the static website.
+
+
+# Config
+
+The Autocomplete needs a config:
+
+  - **transform**
+    into what Msg should be encode all internal autocomplete messages to?
+
+  - **fetch**
+    The autocomplete let your application handle the fetching of suggestions. Supply a function that takes a string and returns a Command. To store the suggestions, call `setSuggestions` when the command completes with an OK.
+
+  - **submit**
+    The message that will be triggered when the user submits a query. Perhaps you want to send the user to a search result page? This does not means that there is a matching suggestion. Imagine the user enters "Karls" and the suggestions return "Karlstad" and "Karlshamn" but the user really want to search for "Karlslund"
+
+  - **chose**
+    The message that will be triggered when the user chooses a suggestion
+
+  - **focus**
+    The message what will be triggered when the user focuses in the input element.
+
+@docs Config
+
+-}
 
 import Debounce exposing (Debounce)
 import Html exposing (Attribute, Html)
@@ -16,7 +45,6 @@ type alias Internals a =
     { query : String
     , suggestions : List a
     , index : Maybe Int
-    , is_open : Bool
     , debounce : Debounce String
     }
 
@@ -57,7 +85,7 @@ debounceConfig =
 
 init : String -> Autocomplete a
 init q =
-    Autocomplete { query = q, suggestions = [], index = Nothing, is_open = False, debounce = Debounce.init }
+    Autocomplete { query = q, suggestions = [], index = Nothing, debounce = Debounce.init }
 
 
 {-| Update the Autocomplete and optionally return a Msg that the parent function should issue.
@@ -98,16 +126,11 @@ update config msg (Autocomplete internals) =
                 }
 
         GotFocus ->
-            let
-                _ =
-                    Debug.log "What message? " config.focus
-            in
-            ignoreUpdate internals
+            { newAutocomplete = Autocomplete internals
+            , maybeMsg = Just config.focus
+            , cmd = Cmd.none
+            }
 
-        -- { newAutocomplete = Autocomplete internals
-        -- , maybeMsg = Just config.focus
-        -- , cmd = Cmd.none
-        -- }
         DebounceMsg subMsg ->
             let
                 ( debounce, cmd ) =
