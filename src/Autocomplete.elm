@@ -1,31 +1,31 @@
 module Autocomplete exposing
-    ( Config
-    , Autocomplete, Msg, init, input, setSuggestions, toView, update
+    ( Autocomplete, Config
+    , init
+    , update, setSuggestions, Msg
+    , input, toView
     )
 
-{-| An opinionated autocomplete component that fits our needs. It's broken into its own package because we need to use it in both the webshop and the static website.
+{-| An opinionated autocomplete component that fits our needs. It's broken into its own package because we need to use it in multiple applications. The autocomplete waits for at least 3 characters and 200 milliseconds before any command is triggered.
 
 
-# Config
+# State
 
-The Autocomplete needs a config:
+@docs Autocomplete, Config
 
-  - **transform**
-    into what Msg should be encode all internal autocomplete messages to?
 
-  - **fetch**
-    The autocomplete let your application handle the fetching of suggestions. Supply a function that takes a string and returns a Command. To store the suggestions, call `setSuggestions` when the command completes with an OK.
+# Initialize
 
-  - **submit**
-    The message that will be triggered when the user submits a query. Perhaps you want to send the user to a search result page? This does not means that there is a matching suggestion. Imagine the user enters "Karls" and the suggestions return "Karlstad" and "Karlshamn" but the user really want to search for "Karlslund"
+@docs init
 
-  - **chose**
-    The message that will be triggered when the user chooses a suggestion
 
-  - **focus**
-    The message what will be triggered when the user focuses in the input element.
+# Update
 
-@docs Config
+@docs update, setSuggestions, Msg
+
+
+# View
+
+@docs input, toView
 
 -}
 
@@ -37,6 +37,8 @@ import Json.Decode as Decode
 import Task
 
 
+{-| The components internal state, the parameter `a` is the type of suggestions that you would like the autocomplete to return. It could be as simple as a string och any other type you'd like.
+-}
 type Autocomplete a
     = Autocomplete (Internals a)
 
@@ -49,6 +51,8 @@ type alias Internals a =
     }
 
 
+{-| Opaque type for internal messages
+-}
 type Msg
     = GotQuery String
     | GotFocus
@@ -64,6 +68,19 @@ type ArrowKey
     | Down
 
 
+{-| The Autocomplete needs a config:
+
+  - **transform**: Into what Msg should be encode all internal autocomplete messages to?
+
+  - **fetch**: The autocomplete let your application handle the fetching of suggestions. Supply a function that takes a string and returns a Command. To store the suggestions, call `setSuggestions` when the command completes with an OK.
+
+  - **submit**: The message that will be triggered when the user submits a query. Perhaps you want to send the user to a search result page? This does not means that there is a matching suggestion. Imagine the user enters "Karls" and the suggestions return "Karlstad" and "Karlshamn" but the user really want to search for "Karlslund"
+
+  - **chose**: The message that will be triggered when the user chooses a suggestion
+
+  - **focus**: The message what will be triggered when the user focuses in the input element.
+
+-}
 type alias Config a msg =
     { transform : Msg -> msg
     , fetch : String -> Cmd msg
@@ -83,6 +100,8 @@ debounceConfig =
     }
 
 
+{-| Initialize the component with an optional query
+-}
 init : String -> Autocomplete a
 init q =
     Autocomplete { query = q, suggestions = [], index = Nothing, debounce = Debounce.init }
@@ -111,7 +130,6 @@ update config msg (Autocomplete internals) =
 
             else
                 let
-                    -- Push your values here.
                     ( debounce, cmd ) =
                         Debounce.push debounceConfig q internals.debounce
                 in
@@ -219,11 +237,15 @@ load q =
     Task.perform LoadSuggestions (Task.succeed q)
 
 
+{-| Update the component with your suggestions
+-}
 setSuggestions : List a -> Autocomplete a -> Autocomplete a
 setSuggestions suggestions (Autocomplete internals) =
     Autocomplete { internals | suggestions = suggestions }
 
 
+{-| Retrieve values intented for the view. The index field potentially holds the index of the selected suggestion.
+-}
 toView : Autocomplete a -> { query : String, suggestions : List a, index : Maybe Int }
 toView (Autocomplete internals) =
     { query = internals.query
@@ -232,6 +254,8 @@ toView (Autocomplete internals) =
     }
 
 
+{-| View the input tag
+-}
 input : Config a msg -> List (Attribute Never) -> Autocomplete a -> Html msg
 input config attrs (Autocomplete { query }) =
     Html.input
