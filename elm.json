@@ -1,6 +1,6 @@
 {
     "type": "package",
-    "name": "special-elektronik/elm-autocomplete",
+    "name": "specialelektronik/elm-autocomplete",
     "summary": "Autcomplete search input in elm",
     "license": "MIT",
     "version" : "1.0.0",
