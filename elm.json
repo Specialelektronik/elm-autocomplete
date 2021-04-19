@@ -3,23 +3,16 @@
     "name": "specialelektronik/elm-autocomplete",
     "summary": "Autcomplete search input in elm",
     "license": "MIT",
-    "version" : "1.0.0",
+    "version": "1.0.0",
     "exposed-modules": [
         "Autocomplete"
     ],
-    "source-directories": [
-        "src"
-    ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
-        "elm/browser": "1.0.0 <= v < 2.0.0",
         "elm/core": "1.0.0 <= v < 2.0.0",
         "elm/html": "1.0.0 <= v < 2.0.0",
         "elm/json": "1.0.0 <= v < 2.0.0",
-        "elm/time": "1.0.0 <= v < 2.0.0",
-        "elm/url": "1.0.0 <= v < 2.0.0",
-        "elm/virtual-dom": "1.0.2 <= v < 2.0.0",
-        "jinjor/elm-debounce" : "3.0.0 <= v < 4.0.0"
+        "jinjor/elm-debounce": "3.0.0 <= v < 4.0.0"
     },
     "test-dependencies": {}
 }
